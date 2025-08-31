@@ -1,1 +1,7 @@
-
+{
+  "name": "StaffBadge",
+  "description": "Adds Owner/Admin/Mod badges next to usernames",
+  "version": "0.1.0",
+  "author": "TxA; @nusrattrix on Discord",
+  "main": "index.ts"
+}

@@ -1,4 +1,4 @@
-import { Plugin } from "vencord";
+import { Plugins } from "vencord";
 
 interface Badge {
   label: string;

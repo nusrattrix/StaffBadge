@@ -5,7 +5,7 @@ interface Badge {
   color?: string;
 }
 
-export default class StaffBadge extends Plugin {
+export default class StaffBadge extends Plugins.Plugin {
   onStart() {
     console.log("[StaffBadge] started");
     this.patchUserBadges();
@@ -13,32 +13,23 @@ export default class StaffBadge extends Plugin {
 
   onStop() {
     console.log("[StaffBadge] stopped");
+    Plugins.Patcher.unpatchAll();
   }
 
   patchUserBadges() {
-    // Find the UserBadge module
-    const UserBadgeModule = this.findModule(m => m.default?.displayName === "UserBadge");
+    const UserBadgeModule = Plugins.WebpackModules.findByDisplayName("UserBadge");
     if (!UserBadgeModule) return;
 
-    const original = UserBadgeModule.default;
-
-    UserBadgeModule.default = (props: any) => {
+    Plugins.Patcher.after(UserBadgeModule, "default", (_, [props], ret) => {
       const user = props.user;
-      let badges: Badge[] = props.badges || [];
+      const badges: Badge[] = props.badges || [];
 
-      // TODO: Replace these IDs with your server's user IDs
       if (user?.id === "OWNER_ID") badges.push({ label: "Owner", color: "#FF4500" });
       else if (user?.id === "ADMIN_ID") badges.push({ label: "Admin", color: "#1E90FF" });
       else if (user?.id === "MOD_ID") badges.push({ label: "Mod", color: "#32CD32" });
 
-      return original({ ...props, badges });
-    };
-  }
-
-  findModule(filter: (mod: any) => boolean) {
-    const modules = Object.values(
-      window.webpackChunkdiscord_app.push([[], {}, e => e.c])
-    ).flatMap(m => Object.values(m));
-    return modules.find(filter);
+      props.badges = badges;
+      return ret;
+    });
   }
 }
